@@ -1,21 +1,10 @@
 package com.example.todolist.ui.feature.addEdit
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -59,26 +48,43 @@ fun AddEditScreen(
         title = title,
         description = description,
         snackbarHostState = snackbarHostState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        navigateBack = navigateBack
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditContent(
     title: String,
     description: String?,
     snackbarHostState: SnackbarHostState,
     onEvent: (AddEditEvent) -> Unit,
+    navigateBack: () -> Unit = {}
 ) {
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (title.isEmpty()) "Nova Tarefa" else "Editar Tarefa") },
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = {
                     onEvent(AddEditEvent.Save)
-                }
-            ) {
-                Icon(Icons.Default.Check, contentDescription = "Save")
-            }
+                },
+                icon = { Icon(Icons.Default.Check, contentDescription = null) },
+                text = { Text("Salvar") },
+                containerColor = MaterialTheme.colorScheme.primary
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -86,38 +92,61 @@ fun AddEditContent(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .consumeWindowInsets(paddingValues)
+                .fillMaxSize()
+                .padding(paddingValues)
                 .padding(16.dp)
         ) {
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = title,
                 onValueChange = {
-                    onEvent(
-                        AddEditEvent.TitleChanged(it)
-                    )
+                    if (it.length <= 100) {
+                        onEvent(AddEditEvent.TitleChanged(it))
+                    }
                 },
-                placeholder = {
-                    Text(text = "Title")
+                label = { Text("Título") },
+                placeholder = { Text("O que precisa ser feito?") },
+                singleLine = true,
+                supportingText = {
+                    Text(
+                        text = "${title.length}/100",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(200.dp),
                 value = description ?: "",
                 onValueChange = {
-                    onEvent(
-                        AddEditEvent.DescriptionChanged(it)
-                    )
+                    if (it.length <= 500) {
+                        onEvent(AddEditEvent.DescriptionChanged(it))
+                    }
                 },
-                placeholder = {
-                    Text(text = "Description (optional)")
+                label = { Text("Descrição") },
+                placeholder = { Text("Adicione detalhes (opcional)") },
+                maxLines = 8,
+                supportingText = {
+                    Text(
+                        text = "${description?.length ?: 0}/500",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (title.isNotBlank()) {
+                Text(
+                    text = "💡 Dica: Pressione o botão Salvar para concluir",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
         }
     }
 }

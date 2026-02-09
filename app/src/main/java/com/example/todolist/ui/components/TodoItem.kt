@@ -1,23 +1,23 @@
 package com.example.todolist.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todolist.domain.Todo
@@ -37,51 +37,92 @@ fun TodoItem(
         onClick = onItemClick,
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
-        shadowElevation = 2.dp,
+        shadowElevation = if (todo.isCompleted) 1.dp else 2.dp,
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
+            color = if (todo.isCompleted)
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            else
+                MaterialTheme.colorScheme.outline
+        ),
+        tonalElevation = if (todo.isCompleted) 0.dp else 1.dp
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(
-                checked = todo.isCompleted,
-                onCheckedChange = onCompletedChange,
+            // Barra lateral colorida
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(60.dp)
+                    .background(
+                        if (todo.isCompleted)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                        else
+                            MaterialTheme.colorScheme.primary
+                    )
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = todo.title,
-                    style = MaterialTheme.typography.titleLarge
+                Checkbox(
+                    checked = todo.isCompleted,
+                    onCheckedChange = onCompletedChange,
                 )
 
-                todo.description?.let {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-
+                Column(
+                    modifier = Modifier.weight(1f),
+                ) {
                     Text(
-                        text = todo.description,
-                        style = MaterialTheme.typography.bodyLarge
+                        text = todo.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        textDecoration = if (todo.isCompleted) TextDecoration.LineThrough else null,
+                        color = if (todo.isCompleted)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface
+                    )
+
+                    AnimatedVisibility(
+                        visible = !todo.description.isNullOrBlank(),
+                        enter = fadeIn() + scaleIn(
+                            spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                        ),
+                        exit = fadeOut() + scaleOut()
+                    ) {
+                        Column {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = todo.description ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (todo.isCompleted)
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = onDeleteClick
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Deletar",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = onDeleteClick
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete" )
             }
         }
     }
