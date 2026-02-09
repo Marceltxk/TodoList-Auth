@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     kotlin("plugin.serialization") version libs.versions.kotlin
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -80,9 +81,12 @@ dependencies {
     // Dagger Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.firebase.auth)
 
     testImplementation(libs.junit)
 

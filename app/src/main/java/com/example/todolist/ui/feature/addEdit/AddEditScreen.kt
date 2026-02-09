@@ -20,31 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.todolist.data.TodoDatabaseProvider
-import com.example.todolist.data.TodoRepositoryImpl
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todolist.ui.UiEvent
 
 @Composable
 fun AddEditScreen(
-    id: Long?,
     navigateBack: () -> Unit,
+    viewModel: AddEditViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current.applicationContext
-    val database = TodoDatabaseProvider.provide(context)
-    val repository = TodoRepositoryImpl(
-        dao = database.todoDao
-    )
-    val viewModel = viewModel<AddEditViewModel> {
-        AddEditViewModel(
-            id = id,
-            repository = repository
-        )
-    }
-
     val title = viewModel.title
     val description = viewModel.description
 
@@ -65,8 +50,7 @@ fun AddEditScreen(
                     navigateBack()
                 }
 
-                is UiEvent.Navigate<*> -> {
-                }
+                else -> Unit
             }
         }
     }

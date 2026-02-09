@@ -1,7 +1,10 @@
 package com.example.todolist.ui
 
-sealed interface UiEvent {
-    data class ShowSnackbar(val message: String) : UiEvent
-    data object NavigateBack : UiEvent
-    data class Navigate<T : Any>(val route: T) : UiEvent
+import com.example.todolist.navigation.AddEditRoute
+
+sealed class UiEvent {
+    data class Navigate(val route: AddEditRoute) : UiEvent()
+    object NavigateBack : UiEvent()
+    object NavigateToLogin : UiEvent()
+    data class ShowSnackbar(val message: String) : UiEvent()
 }
