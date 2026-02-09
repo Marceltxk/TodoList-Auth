@@ -34,12 +34,16 @@ class AuthViewModel @Inject constructor() : ViewModel() {
             _authState.value = AuthState.Error("Email e senha não podem estar vazios")
             return
         }
+        if (!isValidEmail(email)) {
+            _authState.value = AuthState.Error("Formato de email inválido")
+            return
+        }
 
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { _authState.value = AuthState.Authenticated }
-                .addOnFailureListener { _authState.value = AuthState.Error(it.message ?: "Erro ao fazer login") }
+                .addOnFailureListener { _authState.value = AuthState.Error(translateError(it.message)) }
         }
     }
 
@@ -48,12 +52,43 @@ class AuthViewModel @Inject constructor() : ViewModel() {
             _authState.value = AuthState.Error("Email e senha não podem estar vazios")
             return
         }
+        if (!isValidEmail(email)) {
+            _authState.value = AuthState.Error("Formato de email inválido")
+            return
+        }
+        if (password.length < 6) {
+            _authState.value = AuthState.Error("A senha deve ter no mínimo 6 caracteres")
+            return
+        }
 
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { _authState.value = AuthState.Authenticated }
-                .addOnFailureListener { _authState.value = AuthState.Error(it.message ?: "Erro ao criar conta") }
+                .addOnFailureListener { _authState.value = AuthState.Error(translateError(it.message)) }
+        }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun translateError(message: String?): String {
+        return when {
+            message == null -> "Erro desconhecido"
+            message.contains("password is invalid") || message.contains("wrong-password") ->
+                "Senha incorreta"
+            message.contains("no user record") || message.contains("user-not-found") ->
+                "Usuário não encontrado"
+            message.contains("email address is already") || message.contains("email-already-in-use") ->
+                "Este email já está cadastrado"
+            message.contains("badly formatted") || message.contains("invalid-email") ->
+                "Formato de email inválido"
+            message.contains("network error") || message.contains("network") ->
+                "Erro de conexão. Verifique sua internet"
+            message.contains("too many requests") ->
+                "Muitas tentativas. Tente novamente mais tarde"
+            else -> message
         }
     }
 
