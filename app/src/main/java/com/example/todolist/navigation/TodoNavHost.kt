@@ -33,10 +33,7 @@ fun TodoNavHost() {
     val authViewModel: AuthViewModel = hiltViewModel()
     val authState by authViewModel.authState.collectAsState()
 
-    val startDestination = when (authState) {
-        is AuthState.Authenticated -> ListRoute
-        else -> LoginRoute
-    }
+    val startDestination = if (authState is AuthState.Authenticated) ListRoute else LoginRoute
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable<LoginRoute> {
@@ -65,6 +62,7 @@ fun TodoNavHost() {
 
         composable<ListRoute> {
             ListScreen(
+                authViewModel = authViewModel,
                 navigateToAddEditScreen = { id ->
                     navController.navigate(AddEditRoute(id = id))
                 },

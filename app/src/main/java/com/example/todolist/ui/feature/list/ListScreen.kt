@@ -15,12 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.todolist.auth.AuthViewModel
 import com.example.todolist.domain.Todo
 import com.example.todolist.ui.UiEvent
 import com.example.todolist.ui.components.TodoItem
 
 @Composable
 fun ListScreen(
+    authViewModel: AuthViewModel,
     navigateToAddEditScreen: (id: Long?) -> Unit,
     navigateToLogin: () -> Unit,
     viewModel: ListViewModel = hiltViewModel()
@@ -31,7 +33,10 @@ fun ListScreen(
         viewModel.uiEvent.collect { uiEvent ->
             when (uiEvent) {
                 is UiEvent.Navigate -> navigateToAddEditScreen(uiEvent.route.id)
-                UiEvent.NavigateToLogin -> navigateToLogin()
+                UiEvent.NavigateToLogin -> {
+                    authViewModel.logout()
+                    navigateToLogin()
+                }
                 else -> {}
             }
         }

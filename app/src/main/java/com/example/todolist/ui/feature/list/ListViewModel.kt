@@ -60,7 +60,6 @@ class ListViewModel @Inject constructor(
 
     private fun logout() {
         viewModelScope.launch {
-            FirebaseAuth.getInstance().signOut()
             _uiEvent.send(UiEvent.NavigateToLogin)
         }
     }

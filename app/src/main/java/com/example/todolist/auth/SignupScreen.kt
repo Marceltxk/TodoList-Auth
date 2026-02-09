@@ -29,6 +29,10 @@ fun SignupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Row(modifier = Modifier.padding(bottom = 48.dp)) {
+            Text("To", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.primary)
+            Text("Do List", style = MaterialTheme.typography.displaySmall)
+        }
         Text("Cadastro", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 32.dp))
 
         OutlinedTextField(
